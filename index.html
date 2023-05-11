@@ -31,30 +31,67 @@
 </head>
 
 <body>
+  <header>
+    <h1 class="text-center mb-5">Pokédex</h1>
+  </header>
 
-  <div id="pokeCards"></div>
+  <main>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9">
+          <div id="pokeCards"></div>
+        </div>
+        <div class="col-md-3">
+          <h2 class="mb-3">Filter by Type:</h2>
+          <select class="form-control" id="typeFilter">
+            <option value="all">All</option>
+            <option value="normal">Normal</option>
+            <option value="fire">Fire</option>
+            <option value="water">Water</option>
+            <option value="electric">Electric</option>
+            <option value="grass">Grass</option>
+            <option value="ice">Ice</option>
+            <option value="fighting">Fighting</option>
+            <option value="poison">Poison</option>
+            <option value="ground">Ground</option>
+            <option value="flying">Flying</option>
+            <option value="psychic">Psychic</option>
+            <option value="bug">Bug</option>
+            <option value="rock">Rock</option>
+            <option value="ghost">Ghost</option>
+            <option value="dragon">Dragon</option>
+            <option value="dark">Dark</option>
+            <option value="steel">Steel</option>
+            <option value="fairy">Fairy</option>
+          </select>
+        </div>
+      </div>
 
-  <div id="pokeModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Modal title</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>Modal body text goes here.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <div class="text-center" id="paginationDiv">
+        <div id="pagination"></div>
+      </div>
+
+      <!-- Modal -->
+      <div class="modal fade" id="pokeModal" tabindex="-1" role="dialog" aria-labelledby="pokeModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 class="modal-title" id="pokeModalLabel"></h2>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body"></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
-
-    <div id="pagination"></div>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.6/dist/umd/popper.min.js"
+    integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+    crossorigin="anonymous"></script>
 </body>
 
 </html>
