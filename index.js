@@ -81,11 +81,7 @@ const typeApplyButton = async () => {
   });
 };
 
-
-
-
 const setup = async () => {
-  // test out poke api using axios here
   populateTypes();
 
   $('#pokeCards').empty()
@@ -98,13 +94,12 @@ const setup = async () => {
   updatePaginationDiv(currentPage, numPages)
 
 
-  // pop up modal when clicking on a pokemon card
-  // add event listener to each pokemon card
+  //Create pop up modal when user clicks on pokemon card
+  // By adding the event listener to the body, we can listen to events on elements that are added to the page after the page is loaded
   $('body').on('click', '.pokeCard', async function (e) {
     const pokemonName = $(this).attr('pokeName')
     // console.log("pokemonName: ", pokemonName);
     const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`)
-    // console.log("res.data: ", res.data);
     const types = res.data.types.map((type) => type.type.name)
     // console.log("types: ", types);
     $('.modal-body').html(`
@@ -138,20 +133,20 @@ const setup = async () => {
         `)
   })
 
-  // add event listener to pagination buttons
+  // Implement page buttons
   $('body').on('click', ".numberedButtons", async function (e) {
     currentPage = Number(e.target.value)
     if (//if the variable typePokemons does not exist
       typeof typePokemons === 'undefined') {
       paginate(currentPage, PAGE_SIZE, pokemons)
 
-      //update pagination buttons
+      //update page buttons
       updatePaginationDiv(currentPage, numPages)
     }
     else {
       paginate(currentPage, PAGE_SIZE, typePokemons)
 
-      //update pagination buttons
+      //update page buttons
       updatePaginationDiv(currentPage, Math.ceil(typePokemons.length / PAGE_SIZE))
     }
 
