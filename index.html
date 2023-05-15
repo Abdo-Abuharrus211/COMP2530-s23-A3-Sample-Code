@@ -32,61 +32,55 @@
 
 <body>
   <header>
-    <h1 class="text-center mb-5">Pokédex</h1>
-  </header>
-
-  <main>
-    <div class="container">
-      <div class="row">
-        <div class="col-md-9">
-          <div id="pokeCards"></div>
-        </div>
-        <div class="col-md-3">
-          <h2 class="mb-3">Filter by Type:</h2>
-          <select class="form-control" id="typeFilter">
-            <option value="all">All</option>
-            <option value="normal">Normal</option>
-            <option value="fire">Fire</option>
-            <option value="water">Water</option>
-            <option value="electric">Electric</option>
-            <option value="grass">Grass</option>
-            <option value="ice">Ice</option>
-            <option value="fighting">Fighting</option>
-            <option value="poison">Poison</option>
-            <option value="ground">Ground</option>
-            <option value="flying">Flying</option>
-            <option value="psychic">Psychic</option>
-            <option value="bug">Bug</option>
-            <option value="rock">Rock</option>
-            <option value="ghost">Ghost</option>
-            <option value="dragon">Dragon</option>
-            <option value="dark">Dark</option>
-            <option value="steel">Steel</option>
-            <option value="fairy">Fairy</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="text-center" id="paginationDiv">
-        <div id="pagination"></div>
-      </div>
-
-      <!-- Modal -->
-      <div class="modal fade" id="pokeModal" tabindex="-1" role="dialog" aria-labelledby="pokeModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h2 class="modal-title" id="pokeModalLabel"></h2>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body"></div>
-          </div>
+    <h1 class="text-center mb-5">Something Something Pokemon Something... I dunno</h1>
+    <div class="dropdown float-right">
+      <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false">
+        Filter By Type
+      </button>
+      <div class="dropdown-menu dropdown-menu-right margin" id="typeSelect" aria-labelledby="dropdownMenuButton">
+        <div class="form-group margin">
+          <button type="button" class="btn btn-warning padding" data-dismiss="dropdown">Cancel</button>
+          <button type="button" class="btn btn-primary padding" id="typeApplyButton">Apply</button>
         </div>
       </div>
     </div>
+  </header>
+
+  <main>
+  <div class="flexbox-container" id="titleInfo">
+    <h1 class="justify-content-center-header">The Pokemon Dataset</h1>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div id="pokeCards"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div id="pagination"></div>
+      </div>
+    </div>
+  </div>
+  <div id="pokeModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Modal body text goes here.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.6/dist/umd/popper.min.js"

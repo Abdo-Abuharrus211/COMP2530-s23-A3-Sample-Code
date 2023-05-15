@@ -1,144 +1,212 @@
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10
 let currentPage = 1;
-let pokemons = [];
+let pokemons = []
+
+String.prototype.toProperCase = function () {
+  return this.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+};
+
+const populateTypes = async () => {
+  const res = await axios.get('https://pokeapi.co/api/v2/type');
+  const types = res.data.results;
+  types.forEach((type) => {
+    var html = `
+    <div class="form-check margin">
+    <input class="form-check-input" type="checkbox" id="${type.name}" value="">
+    <label class="form-check-label">
+        ${type.name.toProperCase()}
+    </label>
+</div>
+    `
+    $('#typeSelect').append(html);
+  }
+  );
+};
 
 const updatePaginationDiv = (currentPage, numPages) => {
-  $("#pagination").empty();
+  $('#pagination').empty();
 
-  const startPage = 1;
-  const endPage = numPages;
+  let startPage = Math.max(currentPage - 2, 1);
+  let endPage = Math.min(startPage + 4, numPages);
+
+  if (endPage - startPage < 4) {
+    startPage = Math.max(endPage - 4, 1);
+  }
+
+  if (startPage !== 1 || currentPage !== 1) {
+    $('#pagination').append(`
+    <button class="btn btn-primary page ml-1 numberedButtons${currentPage === 1 ? ' disabled' : ''}" value="${currentPage - 1}">&laquo; Previous</button>
+  `);
+  }
+
   for (let i = startPage; i <= endPage; i++) {
-    $("#pagination").append(`
-      <button class="btn btn-primary page ml-1 numberedButtons" value="${i}">${i}</button>
+    $('#pagination').append(`
+      <button class="btn btn-primary page ml-1 numberedButtons${i === currentPage ? ' active' : ''}" value="${i}">${i}</button>
     `);
+  }
+
+  if (endPage !== numPages || currentPage !== numPages) {
+    $('#pagination').append(`
+    <button class="btn btn-primary page ml-1 numberedButtons${currentPage === numPages ? ' disabled' : ''}" value="${currentPage + 1}">Next &raquo;</button>
+  `);
   }
 };
 
-const paginate = async (currentPage, PAGE_SIZE, filteredPokemons) => {
-  const selectedPokemons = filteredPokemons.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
+  selected_pokemons = pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  $('#titleInfo').empty();
+  $('#titleInfo').append(`
+    <h1 class="justify-content-center-header">Displaying ${Math.min(PAGE_SIZE, pokemons.length - (currentPage - 1) * PAGE_SIZE)} of ${pokemons.length} Pokemon</h1>
+    `);
 
-  $("#pokeCards").empty();
-  for (const pokemon of selectedPokemons) {
+  $('#pokeCards').empty();
+  selected_pokemons.forEach(async (pokemon) => {
     const res = await axios.get(pokemon.url);
-    $("#pokeCards").append(`
-      <div class="pokeCard card" pokeName=${res.data.name} category=${pokemon.category}>
-        <h3>${res.data.name.toUpperCase()}</h3>
+    $('#pokeCards').append(`
+      <div class="pokeCard card" pokeName=${res.data.name}>
+        <h4>${res.data.name.toUpperCase()}</h4>
         <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pokeModal">
+        <button type="button" class="btn btn-primary margin" data-toggle="modal" data-target="#pokeModal">
           More
         </button>
       </div>
     `);
-  }
+  });
 };
+
+const typeApplyButton = async () => {
+  let selectedTypes = [];
+  $('#typeSelect input:checked').each(function () {
+    selectedTypes.push($(this).attr('id'));
+  });
+};
+
+
+
 
 const setup = async () => {
   // test out poke api using axios here
-  $("#pokeCards").empty();
-  const response = await axios.get("https://pokeapi.co/api/v2/pokemon?offset=0&limit=810");
-  pokemons = response.data.results.map((pokemon) => ({ ...pokemon, category: "all" }));
+  populateTypes();
 
-  const categories = ["all", "fire", "water", "grass", "electric", "ice", "rock", "ground", "flying", "poison"];
-  const categoryOptions = categories.map((category) => `<option value="${category}">${category.toUpperCase()}</option>`);
-  $("#categoryFilter").html(categoryOptions);
+  $('#pokeCards').empty()
+  let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
+  pokemons = response.data.results;
 
-  // filter pokemons by category
-  $("#categoryFilter").on("change", function () {
-    const selectedCategory = $(this).val();
-    if (selectedCategory === "all") {
-      for (const pokemon of filteredPokemons) {
-        $(`.pokeCard[category="${pokemon.category}"]`).show();
-      }
-      paginate(currentPage, PAGE_SIZE, pokemons);
-    } else {
-      const filteredPokemons = pokemons.filter((pokemon) => pokemon.category === selectedCategory);
-      for (const pokemon of pokemons) {
-        if (pokemon.category === selectedCategory) {
-          $(`.pokeCard[category="${pokemon.category}"]`).show();
-        } else {
-          $(`.pokeCard[category="${pokemon.category}"]`).hide();
-        }
-      }
-      paginate(currentPage, PAGE_SIZE, filteredPokemons);
-    }
-    currentPage = 1;
-    const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
-    updatePaginationDiv(currentPage, numPages);
-  });
 
-  paginate(currentPage, PAGE_SIZE, pokemons);
-  const numPages = Math.ceil(pokemons.length / PAGE_SIZE);
-  updatePaginationDiv(currentPage, numPages);
+  paginate(currentPage, PAGE_SIZE, pokemons)
+  const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
+  updatePaginationDiv(currentPage, numPages)
+
 
   // pop up modal when clicking on a pokemon card
   // add event listener to each pokemon card
-  $("body").on("click", ".pokeCard", async function (e) {
-    const pokemonName = $(this).attr("pokeName");
-    const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
-    const types = res.data.types.map((type) => type.type.name);
-    // update modal with pokemon data
-    const pokemonData = {
-      name: res.data.name,
-      imageUrl: res.data.sprites.front_default,
-      type: res.data.types.map((type) => type.type.name),
-      height: res.data.height,
-      weight: res.data.weight,
-    };
+  $('body').on('click', '.pokeCard', async function (e) {
+    const pokemonName = $(this).attr('pokeName')
+    // console.log("pokemonName: ", pokemonName);
+    const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`)
+    // console.log("res.data: ", res.data);
+    const types = res.data.types.map((type) => type.type.name)
+    // console.log("types: ", types);
+    $('.modal-body').html(`
+        <div style="width:200px">
+        <img src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}"/>
+        <div>
+        <h3>Abilities</h3>
+        <ul>
+        ${res.data.abilities.map((ability) => `<li>${ability.ability.name}</li>`).join('')}
+        </ul>
+        </div>
 
-    $("#pokeModalLabel").html(pokemonData.name.toUpperCase());
-    $("#pokeModalImg").attr("src", pokemonData.imageUrl);
-    $("#pokeType").html(pokemonData.type.join(", "));
-    $("#pokeHeight").html(pokemonData.height);
-    $("#pokeWeight").html(pokemonData.weight);
-  });
+        <div>
+        <h3>Stats</h3>
+        <ul>
+        ${res.data.stats.map((stat) => `<li>${stat.stat.name}: ${stat.base_stat}</li>`).join('')}
+        </ul>
 
-  // change page when clicking on numbered button
-  $("body").on("click", ".numberedButtons", async function (e) {
-    currentPage = parseInt($(this).val());
-    const selectedCategory = $("#categoryFilter").val();
-    if (selectedCategory === "all") {
-      paginate(currentPage, PAGE_SIZE, pokemons);
-    } else {
-      const filteredPokemons = pokemons.filter((pokemon) => pokemon.category === selectedCategory);
-      paginate(currentPage, PAGE_SIZE, filteredPokemons);
+        </div>
+
+        </div>
+          <h3>Types</h3>
+          <ul>
+          ${types.map((type) => `<li>${type}</li>`).join('')}
+          </ul>
+      
+        `)
+    $('.modal-title').html(`
+        <h2>${res.data.name.toUpperCase()}</h2>
+        <h5>${res.data.id}</h5>
+        `)
+  })
+
+  // add event listener to pagination buttons
+  $('body').on('click', ".numberedButtons", async function (e) {
+    currentPage = Number(e.target.value)
+    if (//if the variable typePokemons does not exist
+      typeof typePokemons === 'undefined') {
+      paginate(currentPage, PAGE_SIZE, pokemons)
+
+      //update pagination buttons
+      updatePaginationDiv(currentPage, numPages)
     }
-    const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
-    updatePaginationDiv(currentPage, numPages);
-  });
+    else {
+      paginate(currentPage, PAGE_SIZE, typePokemons)
 
-  // change page when clicking on prev/next button
-  $("#prevBtn").on("click", async function () {
-    if (currentPage > 1) {
-      currentPage--;
-      const selectedCategory = $("#categoryFilter").val();
-      if (selectedCategory === "all") {
-        paginate(currentPage, PAGE_SIZE, pokemons);
-      } else {
-        const filteredPokemons = pokemons.filter((pokemon) => pokemon.category === selectedCategory);
-        paginate(currentPage, PAGE_SIZE, filteredPokemons);
-      }
-      const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
-      updatePaginationDiv(currentPage, numPages);
+      //update pagination buttons
+      updatePaginationDiv(currentPage, Math.ceil(typePokemons.length / PAGE_SIZE))
     }
-  });
 
-  $("#nextBtn").on("click", async function () {
-    const selectedCategory = $("#categoryFilter").val();
-    const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
-    if (currentPage < numPages) {
-      currentPage++;
-      if (selectedCategory === "all") {
-        paginate(currentPage, PAGE_SIZE, pokemons);
-      } else {
-        const filteredPokemons = pokemons.filter((pokemon) => pokemon.category === selectedCategory);
-        paginate(currentPage, PAGE_SIZE, filteredPokemons);
-      }
-      updatePaginationDiv(currentPage, numPages);
+  })
+
+  // add event listener to type apply button
+  $('body').on('click', "#typeApplyButton", async function () {
+    let selectedTypes = [];
+    let currentPage = 1;
+    $('#typeSelect input:checked').each(function () {
+      selectedTypes.push($(this).attr('id'));
     }
-  });
-};
+    );
+    console.log(selectedTypes);
+    typePokemons = []
+    if (selectedTypes.length === 1) {
+      pokemons.forEach((pokemon) => {
+        var checkPokemon = pokemonWithTypes.filter((poke) => poke.name === pokemon.name)[0]
+        // console.log(checkPokemon);
+        if (checkPokemon.types.some((type) => selectedTypes.includes(type))) {
+          typePokemons.push(pokemon)
+          return
+        }
+      })
+      console.log(typePokemons);
+    }
+    else {
+      pokemons.forEach((pokemon) => {
+        var checkPokemon = pokemonWithTypes.filter((poke) => poke.name === pokemon.name)[0];
+        if (selectedTypes.every((type) => checkPokemon.types.includes(type))) {
+          typePokemons.push(pokemon);
+        }
+      });
+      console.log(typePokemons);
+    }
 
-$(document).ready(setup);
+    paginate(currentPage, PAGE_SIZE, typePokemons)
+    updatePaginationDiv(currentPage, Math.ceil(typePokemons.length / PAGE_SIZE))
+
+  }
+  )
+  pokemonWithTypes = []
+  await pokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url);
+    var pokemonTypes = []
+    res.data.types.forEach((type) => {
+      pokemonTypes.push(type.type.name)
+      pokemonWithTypes.push({
+        name: res.data.name,
+        types: pokemonTypes
+      });
+    });
+  });
+
+}
+
+
+$(document).ready(setup)
