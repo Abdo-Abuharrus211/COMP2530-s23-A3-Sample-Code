@@ -162,6 +162,10 @@ const setup = async () => {
     );
     console.log(selectedTypes);
     typePokemons = []
+
+
+    // Implement pokemon filtering 
+    //if no types are selected, display all pokemon
     if (selectedTypes.length === 1) {
       pokemons.forEach((pokemon) => {
         var checkPokemon = pokemonWithTypes.filter((poke) => poke.name === pokemon.name)[0]
